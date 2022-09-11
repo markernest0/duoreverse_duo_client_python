@@ -33,20 +33,20 @@ Endpoint objects are returned in the following format:
     {"username": <str:username>,
      "email": <str:email>,
      "epkey": <str:epkey>,
-     "os_family": <str:os family>,
-     "os_version": <str:os version>,
+     "os family": <str:os family>,
+     "os version": <str:os version>,
      "model": <str:model>,
      "type": <str:type>,
-     "browsers": [<browser object, ...]|None}
+     "browsers": [<browser object, ...]}
 
 
 BROWSERS
 
 Browser objects are returned in the following format:
-    {"browser_family": <str:browser family>,
-     "browser_version": <str:browser version>,
-     "flash_version": <str: flash version>,
-     "java_version": <str: java version>}
+    {"browser family": <str:browser family>,
+     "browser version": <str:browser version>,
+     "flash version": <str: flash version>,
+     "java version": <str: java version>}
 
 
 PHONES
@@ -110,7 +110,6 @@ Settings objects are returned in the following format:
      'password_requires_numeric': <bool:is numeric character required>,
      'password_requires_special': <bool:is special character required>,
      'security_checkup_enabled': <bool:is the security checkup feature enabled>,
-     'user_managers_can_put_users_in_bypass': <bool:can user managers put users in bypass status>,
     }
 
 
@@ -138,22 +137,6 @@ Integration objects are returned in the following format:
 
 See the adminapi docs for possible values for enroll_policy, visual_style, ip_whitelist,
 and type.
-
-
-ADMINISTRATIVE UNITS
-
-Administrative unit objects are returned in the following format:
-
-    {'admin_unit_id': <str:administrative unit id>,
-     'name': <str:administrative unit name>,
-     'description': <str:administrative unit description>,
-     'restrict_by_groups': <bool:group restriction (0|1)>,
-     'restrict_by_integrations': <bool:integration restriction (0|1)>,
-     'admins': [<str:admin key>, ...],
-     'groups': [<str:group key>, ...],
-     'integrations': [<str:integration key>, ...],
-    }
-
 
 ERRORS
 
@@ -1754,7 +1737,6 @@ class Admin(client.Client):
                         reactivation_url=None,
                         reactivation_integration_key=None,
                         security_checkup_enabled=None,
-                        user_managers_can_put_users_in_bypass=None,
                         ):
         """
         Update settings.
@@ -1792,7 +1774,6 @@ class Admin(client.Client):
         reactivation_url - <str:url>|None
         reactivation_integration_key - <str:url>|None
         security_checkup_enabled - True|False|None
-        user_managers_can_put_users_in_bypass - True|False|None
 
         Returns updated settings object.
 
@@ -1863,9 +1844,6 @@ class Admin(client.Client):
         if security_checkup_enabled is not None:
             params['security_checkup_enabled'] = ('1' if
                 security_checkup_enabled else '0')
-        if user_managers_can_put_users_in_bypass is not None:
-            params['user_managers_can_put_users_in_bypass'] = ('1' if
-                user_managers_can_put_users_in_bypass else '0')
 
         if not params:
             raise TypeError("No settings were provided")
@@ -2542,7 +2520,7 @@ class Admin(client.Client):
         response = self.json_api_call('GET', path, {})
         return response
 
-    def add_admin(self, name, email, phone, password, role=None):
+    def add_admin(self, name, email, phone, password, role=None, send_email=None):
         """
         Create an administrator and adds it to a customer.
 
@@ -2565,6 +2543,8 @@ class Admin(client.Client):
             params['phone'] = phone
         if role is not None:
             params['role'] = role
+        if send_email is not None:
+            params['send_email'] = str(int(bool(send_email)))
         response = self.json_api_call('POST', '/admin/v1/admins', params)
         return response
 
@@ -2572,8 +2552,8 @@ class Admin(client.Client):
                      name=None,
                      phone=None,
                      password=None,
-                     password_change_required=None, 
-                     status=None, 
+                     password_change_required=None,
+                     status=None,
                      ):
         """
         Update one or more attributes of an administrator.
